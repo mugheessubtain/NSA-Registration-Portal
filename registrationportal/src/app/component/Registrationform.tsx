@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react"
 import { toast } from "react-toastify";
+import { supabase } from "../../../utils/supabaseClient"
 
 export default function Form() {
     const [userName, setUserName] = useState("");
@@ -13,11 +14,11 @@ export default function Form() {
     const [selectedDomains, setSelectedDomains] = useState<string[]>([]); // Array for selected domains
     const [sport, setSport] = useState("");
     const [rollNo, setRollNo] = useState("");
-    const [soceity, setSoceity] = useState("");
+    const [society, setSociety] = useState("");
     const route=useRouter();
 
     const validateFields = () => {
-        if (!userName || !email || !rollNo || !department || !batch || !contact || !soceity || !sport || selectedDomains.length === 0) {
+        if (!userName || !email || !rollNo || !department || !batch || !contact || !society || !sport || selectedDomains.length === 0) {
             toast.error("Please fill in all fields.");
             return false;
         }
@@ -42,30 +43,45 @@ export default function Form() {
         setDepartment("");
         setBatch("");
         setContact("");
-        setSoceity("");
+        setSociety("");
         setSelectedDomains([]);
         setSport("");
     };
 
-    const allData = () => {
+    const allData = async () => {
         if (!validateFields()) return;
+      
         const data = {
-            userName,
-            email,
-            rollNo,
-            department,
-            batch,
-            contact,
-            soceity,
-            selectedDomains, // Include selected domains
-            sport
+          userName,
+          email,
+          rollNo,
+          department,
+          batch,
+          contact,
+          society,
+          selectedDomains, 
+          sport,
         };
-        console.log(data);
-        route.push("/completeRegistration")
-        resetInput();
-        toast.success("Thanks! For Registration")
-    };
-
+      
+        try {
+          const { error } = await supabase.from("participant").insert([data]);
+      
+          if (error) {
+            console.error("Supabase Error:", error.message);
+            toast.error("There was an error submitting the form. Please try again.");
+            return;
+          }
+      
+        
+          route.push("/completeRegistration");
+          resetInput();
+          toast.success("Thanks for registering!");
+      
+        } catch (error) {
+          console.error("Unexpected Error:", error);
+          toast.error("An unexpected error occurred.");
+        }
+      };
     const handleCheckboxChange = (e:React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSelectedDomains((prev) => {
@@ -190,8 +206,8 @@ export default function Form() {
                             <select
                                 className="w-full input input-bordered input-primary rounded-lg"
                                 id="sport"
-                                value={soceity}
-                                onChange={(e) => setSoceity(e.target.value)}
+                                value={society}
+                                onChange={(e) => setSociety(e.target.value)}
                             >
                                 <option>Select your Soceity</option>
                                 <option value={"NSA– NED SMS Alert Society"}>NSA– NED SMS Alert Society</option>
