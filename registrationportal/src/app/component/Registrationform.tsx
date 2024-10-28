@@ -67,8 +67,8 @@ export default function Form() {
           const { error } = await supabase.from("participant").insert([data]);
       
           if (error) {
-            console.error("Supabase Error:", error.message);
-            toast.error("There was an error submitting the form. Please try again.");
+            
+            toast.error(`Supabase Error: ${error.message}`);
             return;
           }
       
